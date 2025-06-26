@@ -1,82 +1,82 @@
-import { Action, SolanaAgentKit } from "solana-agent-kit";
-import { z } from "zod";
-import launchPumpFunToken from "../tools/launchPumpfunToken";
+import { Action, SolanaAgentKit } from 'solana-agent-kit'
+import { z } from 'zod'
+import launchPumpFunToken from '../tools/launchPumpfunToken'
 
 const launchPumpfunTokenAction: Action = {
-  name: "LAUNCH_PUMPFUN_TOKEN",
+  name: 'LAUNCH_PUMPFUN_TOKEN',
   similes: [
-    "create pumpfun token",
-    "launch token on pumpfun",
-    "deploy pumpfun token",
-    "create meme token",
-    "launch memecoin",
-    "create pump token",
+    'create pumpfun token',
+    'launch token on pumpfun',
+    'deploy pumpfun token',
+    'create meme token',
+    'launch memecoin',
+    'create pump token',
   ],
   description:
-    "Launch a new token on Pump.fun with customizable metadata and initial liquidity",
+    'Launch a new token on Pump.fun with customizable metadata and initial liquidity',
   examples: [
     [
       {
         input: {
-          tokenName: "Sample Token",
-          tokenTicker: "SMPL",
-          description: "A sample token for demonstration",
-          imageUrl: "https://example.com/token.png",
-          twitter: "@sampletoken",
-          telegram: "t.me/sampletoken",
-          website: "https://sampletoken.com",
+          tokenName: 'Sample Token',
+          tokenTicker: 'SMPL',
+          description: 'A sample token for demonstration',
+          imageUrl: 'https://example.com/token.png',
+          twitter: '@sampletoken',
+          telegram: 't.me/sampletoken',
+          website: 'https://sampletoken.com',
           initialLiquiditySOL: 0.1,
           slippageBps: 10,
           priorityFee: 0.0001,
         },
         output: {
-          status: "success",
-          signature: "2ZE7Rz...",
-          mint: "7nxQB...",
-          metadataUri: "https://arweave.net/...",
-          message: "Successfully launched token on Pump.fun",
+          status: 'success',
+          signature: '2ZE7Rz...',
+          mint: '7nxQB...',
+          metadataUri: 'https://arweave.net/...',
+          message: 'Successfully launched token on Pump.fun',
         },
         explanation:
-          "Launch a new token with custom metadata and 0.1 SOL initial liquidity",
+          'Launch a new token with custom metadata and 0.1 SOL initial liquidity',
       },
     ],
   ],
   schema: z.object({
-    tokenName: z.string().min(1).max(32).describe("Name of the token"),
+    tokenName: z.string().min(1).max(32).describe('Name of the token'),
     tokenTicker: z
       .string()
       .min(2)
       .max(10)
-      .describe("Ticker symbol of the token"),
+      .describe('Ticker symbol of the token'),
     description: z
       .string()
       .min(1)
       .max(1000)
-      .describe("Description of the token"),
-    imageUrl: z.string().url().describe("URL of the token image"),
-    twitter: z.string().optional().describe("Twitter handle (optional)"),
-    telegram: z.string().optional().describe("Telegram group link (optional)"),
-    website: z.string().url().optional().describe("Website URL (optional)"),
+      .describe('Description of the token'),
+    imageUrl: z.string().url().describe('URL of the token image'),
+    twitter: z.string().optional().describe('Twitter handle (optional)'),
+    telegram: z.string().optional().describe('Telegram group link (optional)'),
+    website: z.string().url().describe('Website URL'),
     initialLiquiditySOL: z
       .number()
       .min(0.0001)
       .default(0.0001)
-      .describe("Initial liquidity in SOL"),
+      .describe('Initial liquidity in SOL'),
     slippageBps: z
       .number()
       .min(1)
       .max(1000)
       .default(5)
-      .describe("Slippage tolerance in basis points"),
+      .describe('Slippage tolerance in basis points'),
     priorityFee: z
       .number()
       .min(0.00001)
       .default(0.00005)
-      .describe("Priority fee in SOL"),
+      .describe('Priority fee in SOL'),
   }),
   handler: async (agent: SolanaAgentKit, input: Record<string, any>) => {
     try {
-      const { tokenName, tokenTicker, description, imageUrl } = input;
+      const { tokenName, tokenTicker, description, imageUrl } = input
       const result = await launchPumpFunToken(
         agent,
         tokenName,
@@ -86,36 +86,37 @@ const launchPumpfunTokenAction: Action = {
         input.initialLiquiditySOL,
         input.twitter,
         input.telegram,
-        input.website,
-      );
+        input.website
+      )
 
-      if ("signedTransaction" in result) {
+      if ('signedTransaction' in result) {
         return {
-          status: "success",
+          status: 'success',
           transaction: result.signedTransaction,
-          message: "Successfully prepared transaction to launch token on Pump.fun. Please sign and send.",
-        };
-      } else if ("txHash" in result) {
+          message:
+            'Successfully prepared transaction to launch token on Pump.fun. Please sign and send.',
+        }
+      } else if ('txHash' in result) {
         return {
-          status: "success",
+          status: 'success',
           mint: result.mint,
           metadataUri: result.metadataUri,
           transaction: result.txHash,
-          message: "Successfully launched token on Pump.fun",
-        };
+          message: 'Successfully launched token on Pump.fun',
+        }
       } else {
         return {
-          status: "error",
-          message: "Failed to launch token on Pump.fun",
-        };
+          status: 'error',
+          message: 'Failed to launch token on Pump.fun',
+        }
       }
     } catch (error: any) {
       return {
-        status: "error",
+        status: 'error',
         message: `Failed to launch token: ${error.message}`,
-      };
+      }
     }
   },
-};
+}
 
-export default launchPumpfunTokenAction;
+export default launchPumpfunTokenAction

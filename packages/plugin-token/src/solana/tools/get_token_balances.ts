@@ -1,7 +1,7 @@
-import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { LAMPORTS_PER_SOL, type PublicKey } from "@solana/web3.js";
-import { SolanaAgentKit } from "solana-agent-kit";
-import { getTokenMetadata } from "./utils/tokenMetadata";
+import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
+import { LAMPORTS_PER_SOL, type PublicKey } from '@solana/web3.js'
+import { SolanaAgentKit } from 'solana-agent-kit'
+import { getTokenMetadata } from './utils/tokenMetadata'
 
 /**
  * Get the token balances of a Solana wallet
@@ -11,49 +11,70 @@ import { getTokenMetadata } from "./utils/tokenMetadata";
  */
 export async function get_token_balance(
   agent: SolanaAgentKit,
-  walletAddress?: PublicKey,
+  walletAddress?: PublicKey
 ): Promise<{
-  sol: number;
+  sol: number
   tokens: Array<{
-    tokenAddress: string;
-    name: string;
-    symbol: string;
-    balance: number;
-    decimals: number;
-  }>;
+    tokenAddress: string
+    name: string
+    symbol: string
+    balance: number
+    decimals: number
+  }>
 }> {
-  const [lamportsBalance, tokenAccountData] = await Promise.all([
-    agent.connection.getBalance(walletAddress ?? agent.wallet.publicKey),
-    agent.connection.getParsedTokenAccountsByOwner(
-      walletAddress ?? agent.wallet.publicKey,
+  const targetWallet = walletAddress ?? agent.wallet.publicKey
+
+  let lamportsBalance = 0
+  try {
+    lamportsBalance = await agent.connection.getBalance(targetWallet)
+  } catch {
+    lamportsBalance = 0
+  }
+
+  let tokenAccountData: { value: any[] } = { value: [] }
+  try {
+    tokenAccountData = await agent.connection.getParsedTokenAccountsByOwner(
+      targetWallet,
       {
         programId: TOKEN_PROGRAM_ID,
-      },
-    ),
-  ]);
+      }
+    )
+  } catch {
+    tokenAccountData = { value: [] }
+  }
 
   const removedZeroBalance = tokenAccountData.value.filter(
-    (v: any) => v.account.data.parsed.info.tokenAmount.uiAmount !== 0,
-  );
+    (v: any) => v.account.data.parsed.info.tokenAmount.uiAmount !== 0
+  )
 
   const tokenBalances = await Promise.all(
     removedZeroBalance.map(async (v: any) => {
-      const mint = v.account.data.parsed.info.mint;
-      const mintInfo = await getTokenMetadata(agent.connection, mint);
+      const mint = v.account.data.parsed.info.mint
+      let mintInfo: { name: string | null; symbol: string | null } = {
+        name: null,
+        symbol: null,
+      }
+
+      try {
+        mintInfo = await getTokenMetadata(agent.connection, mint)
+      } catch {
+        mintInfo = { name: null, symbol: null }
+      }
+
       return {
         tokenAddress: mint,
-        name: mintInfo.name ?? "",
-        symbol: mintInfo.symbol ?? "",
+        name: mintInfo.name ?? '',
+        symbol: mintInfo.symbol ?? '',
         balance: v.account.data.parsed.info.tokenAmount.uiAmount as number,
         decimals: v.account.data.parsed.info.tokenAmount.decimals as number,
-      };
-    }),
-  );
+      }
+    })
+  )
 
-  const solBalance = lamportsBalance / LAMPORTS_PER_SOL;
+  const solBalance = lamportsBalance / LAMPORTS_PER_SOL
 
   return {
     sol: solBalance,
     tokens: tokenBalances,
-  };
+  }
 }

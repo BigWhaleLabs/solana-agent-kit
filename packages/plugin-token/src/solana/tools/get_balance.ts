@@ -1,5 +1,5 @@
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { SolanaAgentKit } from "solana-agent-kit";
+import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
+import { SolanaAgentKit } from 'solana-agent-kit'
 
 /**
  * Get the balance of SOL or an SPL token for the agent's wallet
@@ -9,16 +9,25 @@ import { SolanaAgentKit } from "solana-agent-kit";
  */
 export async function get_balance(
   agent: SolanaAgentKit,
-  token_address?: PublicKey,
+  token_address?: PublicKey
 ): Promise<number> {
   if (!token_address) {
-    return (
-      (await agent.connection.getBalance(agent.wallet.publicKey)) /
-      LAMPORTS_PER_SOL
-    );
+    try {
+      return (
+        (await agent.connection.getBalance(agent.wallet.publicKey)) /
+        LAMPORTS_PER_SOL
+      )
+    } catch {
+      return 0
+    }
   }
 
-  const token_account =
-    await agent.connection.getTokenAccountBalance(token_address);
-  return token_account.value.uiAmount || 0;
+  try {
+    const token_account = await agent.connection.getTokenAccountBalance(
+      token_address
+    )
+    return token_account.value.uiAmount || 0
+  } catch {
+    return 0
+  }
 }

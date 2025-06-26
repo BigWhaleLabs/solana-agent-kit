@@ -2,8 +2,8 @@ import {
   LAMPORTS_PER_SOL,
   type ParsedAccountData,
   type PublicKey,
-} from "@solana/web3.js";
-import type { SolanaAgentKit } from "solana-agent-kit";
+} from '@solana/web3.js'
+import type { SolanaAgentKit } from 'solana-agent-kit'
 
 /**
  * Get the balance of SOL or an SPL token for the specified wallet address (other than the agent's wallet)
@@ -15,36 +15,31 @@ import type { SolanaAgentKit } from "solana-agent-kit";
 export async function get_balance_other(
   agent: SolanaAgentKit,
   wallet_address: PublicKey,
-  token_address?: PublicKey,
+  token_address?: PublicKey
 ): Promise<number> {
   try {
     if (!token_address) {
       return (
         (await agent.connection.getBalance(wallet_address)) / LAMPORTS_PER_SOL
-      );
+      )
     }
 
     const tokenAccounts = await agent.connection.getTokenAccountsByOwner(
       wallet_address,
-      { mint: token_address },
-    );
+      { mint: token_address }
+    )
 
     if (tokenAccounts.value.length === 0) {
-      console.warn(
-        `No token accounts found for wallet ${wallet_address.toString()} and token ${token_address.toString()}`,
-      );
-      return 0;
+      return 0
     }
 
     const tokenAccount = await agent.connection.getParsedAccountInfo(
-      tokenAccounts.value[0].pubkey,
-    );
-    const tokenData = tokenAccount.value?.data as ParsedAccountData;
+      tokenAccounts.value[0].pubkey
+    )
 
-    return tokenData.parsed?.info?.tokenAmount?.uiAmount || 0;
-  } catch (error) {
-    throw new Error(
-      `Error fetching on-chain balance for ${token_address?.toString()}: ${error}`,
-    );
+    const tokenData = tokenAccount.value?.data as ParsedAccountData
+    return tokenData.parsed?.info?.tokenAmount?.uiAmount || 0
+  } catch {
+    return 0
   }
 }
