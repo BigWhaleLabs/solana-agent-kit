@@ -1,4 +1,4 @@
-import axios, { type Response } from "redaxios";
+import axios, { type Response } from 'redaxios'
 import type {
   CancelJupiterOrderRequest,
   CancelJupiterOrderResponse,
@@ -6,67 +6,67 @@ import type {
   CreateJupiterOrderResponse,
   JupiterOrderHistoryResponse,
   OpenJupiterOrderResponse,
-} from "../../types";
+} from '../../types'
 
 const jupiterApi = axios.create({
-  baseURL: "https://api.jup.ag/limit/v2",
+  baseURL: 'https://lite-api.jup.ag/trigger/v1/',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
-});
+})
 
 async function handleApiRequest<T>(
-  apiCall: () => Promise<Response<T>>,
+  apiCall: () => Promise<Response<T>>
 ): Promise<T> {
   try {
-    const { data } = await apiCall();
-    return data;
+    const { data } = await apiCall()
+    return data
   } catch (error) {
     throw new Error(
       `Jupiter API error: ${
         // @ts-expect-error - Redaxios error type mismatch
         error.message
-      }`,
-    );
+      }`
+    )
   }
 }
 
 export async function createOrderApi(
-  data: CreateJupiterOrderRequest,
+  data: CreateJupiterOrderRequest
 ): Promise<CreateJupiterOrderResponse> {
   return handleApiRequest(async () =>
-    jupiterApi.post<CreateJupiterOrderResponse>("/createOrder", data),
-  );
+    jupiterApi.post<CreateJupiterOrderResponse>('/createOrder', data)
+  )
 }
 
 export async function getOpenOrdersApi(
-  walletAddress: string,
+  walletAddress: string
 ): Promise<OpenJupiterOrderResponse[]> {
   return handleApiRequest(async () =>
-    jupiterApi.get<OpenJupiterOrderResponse[]>("/openOrders", {
+    jupiterApi.get<OpenJupiterOrderResponse[]>('/openOrders', {
       params: { wallet: walletAddress },
-    }),
-  );
+    })
+  )
 }
 
 export async function cancelOrdersApi(
-  data: CancelJupiterOrderRequest,
+  data: CancelJupiterOrderRequest
 ): Promise<CancelJupiterOrderResponse> {
   return handleApiRequest(async () =>
-    jupiterApi.post<CancelJupiterOrderResponse>("/cancelOrders", data),
-  );
+    jupiterApi.post<CancelJupiterOrderResponse>('/cancelOrders', data)
+  )
 }
 
 export async function getOrderHistoryApi(
   walletAddress: string,
-  page = 1,
+  page = 1
 ): Promise<JupiterOrderHistoryResponse> {
   return handleApiRequest(async () =>
-    jupiterApi.get<JupiterOrderHistoryResponse>("/orderHistory", {
+    jupiterApi.get<JupiterOrderHistoryResponse>('/orderHistory', {
       params: {
         wallet: walletAddress,
         page,
       },
-    }),
-  );
+    })
+  )
 }
