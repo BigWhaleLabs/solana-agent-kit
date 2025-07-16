@@ -858,7 +858,7 @@ The repository includes an advanced example of building a multi-agent system usi
 - Fully typed TypeScript implementation
 - Environment-based configuration
 
-Check out the [LangGraph example](examples/agent-kit-langgraph) for a complete implementation of an advanced Solana agent system.
+Check out the [LangGraph example](/examples/misc/agent-kit-langgraph) for a complete implementation of an advanced Solana agent system.
 
 ## Dependencies
 
@@ -877,7 +877,7 @@ The toolkit relies on several key Solana and Metaplex libraries:
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-Refer to [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to contribute to this project.
+Refer to [CONTRIBUTING.md](../../CONTRIBUTING.md) for detailed guidelines on how to contribute to this project.
 
 ## Contributors
 
